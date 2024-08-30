@@ -7,19 +7,22 @@ import (
 
 type LocalTransport struct {
 	addr      NetAddr
-	consumeCh chan RPC
-	lock      sync.RWMutex
-	peers     map[NetAddr]*LocalTransport
+	consumeCh chan RPC                    // A channel used to receive messages
+	lock      sync.RWMutex                // A lock to synchronize access to the peers map, ensuring thread safety.
+	peers     map[NetAddr]*LocalTransport // Stores connections with other nodes
 }
 
+// Creates a new LocalTransport object and returns a pointer to it
 func NewLocalTransport(addr NetAddr) Transport {
 	return &LocalTransport{
 		addr:      addr,
-		consumeCh: make(chan RPC, 1024),
+		consumeCh: make(chan RPC, 1024), // Creates a message channel with a buffer size of 1024
 		peers:     make(map[NetAddr]*LocalTransport),
 	}
 }
 
+// This is a method of the LocalTransport struct.
+// The method returns a read-only `chan` channel, with `RPC` as the channel type.
 func (t *LocalTransport) Consume() <-chan RPC {
 	return t.consumeCh
 }
